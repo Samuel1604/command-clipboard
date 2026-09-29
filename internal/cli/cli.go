@@ -2,23 +2,17 @@ package cli
 
 import (
 	"fmt"
-	"github.com/Samuel1604/command-clipboard/internal/command"
 	"os"
+
+	"github.com/Samuel1604/command-clipboard/internal/service"
 )
 
 // Run starts the Command Clipboard command-line interface.
 //
-// It receives the arguments passed to the program and decides
-// what operation the user want to perform.
-func Run(args []string) {
-	// We need at least one argument after the program name.
-	// For example:
-	//
-	//	cmd save "docker compose up -d"
-	//
-	// The arguments we receive here are:
-	//
-	//	["save", "docker compose up -d"]
+// The service is passed into the CLI so the CLI doesn't need to
+// know how commands are stored.
+func Run(args []string, commandService *service.CommandService) {
+	// We needd at least one argument after the program name.
 	if len(args) < 1 {
 		fmt.Println("Usage: cmd <command> [arguments...]")
 		return
@@ -36,16 +30,19 @@ func Run(args []string) {
 			return
 		}
 
-		// Create a domain Command from the user's input.
-		// We don't have persistence yet, so we temporarily give
-		// it an ID of 0. The storage layer will eventually be
-		// responsible for assigning real IDs.
-		savedCommand := command.Command{
-			ID:      0,
-			Command: args[1],
+		// Ask the application service to save the command
+		//
+		// The CLI doesn't know whether the command is stored in
+		// JSON, SQLite, PostgreSQL, or somewhere else.
+		savedCommand, err  := commandService.Save(args[1])
+
+		if err != nil {
+			fmt.Printf("Error saving command: %v\n", err)
+			return
 		}
 
-		fmt.Printf("Received command: %s\n", savedCommand.Command)
+		fmt.Printf("Saved command #%d\n", savedCommand.ID)
+
 	default:
 		fmt.Printf("Unknown command: %s\n", subcommand)
 	}
