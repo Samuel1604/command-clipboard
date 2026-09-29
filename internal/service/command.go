@@ -37,3 +37,8 @@ func (s *CommandService) Save(text string) (command.Command, error) {
 
 	return s.repository.Save(cmd)
 }
+
+// List returns all saved commands.
+func (s *CommandService) List() ([]command.Command, error){
+	return s.repository.List()	
+}

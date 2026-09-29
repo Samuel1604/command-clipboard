@@ -92,3 +92,8 @@ func nextID(commands []command.Command) int {
 
 	return maxID + 1
 }
+
+// List returns every command currently stored in the JSON file.
+func (r *JSONCommandRepository) List() ([]command.Command, error) {
+	return r.load()
+}

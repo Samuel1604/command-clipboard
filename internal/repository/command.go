@@ -11,4 +11,5 @@ import "github.com/Samuel1604/command-clipboard/internal/command"
 type CommandRepository interface {
 	// Save stores a command and returns the stored command.
 	Save(cmd command.Command) (command.Command, error)
+	List() ([]command.Command, error)
 }

@@ -12,6 +12,8 @@ import (
 // It doesn't write to disk.
 type fakeCommandRepository struct {
 	saved command.Command
+	commands []command.Command
+
 }
 
 // Save statistics the CommandRepository interface.
@@ -25,10 +27,25 @@ func (f *fakeCommandRepository) Save(cmd command.Command) (command.Command, erro
 	return cmd, nil
 }
 
+func (f *fakeCommandRepository) List() ([]command.Command, error) {
+	return f.commands, nil
+}
+
 func TestCommandServiceSave(t *testing.T) {
 	// Create our fake repository.
 	repo := &fakeCommandRepository{}
 
+	repo.saved = command.Command{
+		ID: 1,
+		Command: "docker compose up -d",
+	}
+
+	repo.commands = []command.Command{
+		{
+			ID:		1,
+			Command: "docker compose up -d",
+		},
+	}
 	// Give the service the repository.
 	svc := service.NewCommandService(repo)
 
@@ -47,5 +64,19 @@ func TestCommandServiceSave(t *testing.T) {
 	// Verify that the repository actually received the command.
 	if repo.saved.Command != "docker compose up -d" {
 		t.Fatalf("expected repository to receive command, got %q", repo.saved.Command)
+	}
+
+	// Ask the service to list commands.
+	commands, err := svc.List()
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if len(commands) != 1 {
+		t.Fatalf("expected 1 command, got %d", len(commands))
+	}
+
+	if commands[0].Command != "docker compose up -d" {
+		t.Fatalf("expected saved command, got %q", commands[0].Command)
 	}
 }

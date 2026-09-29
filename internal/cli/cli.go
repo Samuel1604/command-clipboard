@@ -42,6 +42,22 @@ func Run(args []string, commandService *service.CommandService) {
 		}
 
 		fmt.Printf("Saved command #%d\n", savedCommand.ID)
+	
+	case "list":
+		commands, err := commandService.List()
+		if err != nil {
+			fmt.Printf("Error listing commands: %v\n", err)
+			return
+		}
+
+		if len(commands) == 0 {
+			fmt.Println("No commands saved.")
+			return
+		}
+
+		for _, cmd := range commands {
+			fmt.Printf("#%d %s\n", cmd.ID, cmd.Command)
+		}
 
 	default:
 		fmt.Printf("Unknown command: %s\n", subcommand)
