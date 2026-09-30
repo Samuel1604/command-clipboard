@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/Samuel1604/command-clipboard/internal/service"
 )
@@ -58,7 +59,47 @@ func Run(args []string, commandService *service.CommandService) {
 		for _, cmd := range commands {
 			fmt.Printf("#%d %s\n", cmd.ID, cmd.Command)
 		}
+	
+	case "find":
+		if len(args) < 2 {
+			fmt.Println("Usage: cmd find <term>")
+			return
+		}
+		
+		commands, err := commandService.Find(args[1])
+		if err != nil {
+			fmt.Printf("Error finding commands: %v\n", err)
+		}
 
+		if len(commands) == 0 {
+			fmt.Println("No matching commands found.")
+			return
+		}
+
+		for _, cmd := range commands {
+			fmt.Printf("#%d %s\n", cmd.ID, cmd.Command)
+		}
+
+	case "get":
+		if len(args) < 2 {
+			fmt.Println("Usage: cmd get <id>")
+			return
+		}
+
+		id, err := strconv.Atoi(args[1])
+		if err != nil {
+			fmt.Println("ID must be a number")
+			return
+		}
+
+		cmd, err := commandService.Get(id)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+			return
+		}
+
+		fmt.Printf("#%d %s\n", cmd.ID, cmd.Command)
+		
 	default:
 		fmt.Printf("Unknown command: %s\n", subcommand)
 	}

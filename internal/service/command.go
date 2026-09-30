@@ -1,6 +1,9 @@
 package service
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/Samuel1604/command-clipboard/internal/command"
 	"github.com/Samuel1604/command-clipboard/internal/repository"
 )
@@ -40,5 +43,39 @@ func (s *CommandService) Save(text string) (command.Command, error) {
 
 // List returns all saved commands.
 func (s *CommandService) List() ([]command.Command, error){
-	return s.repository.List()	
+	return s.repository.List()
+}
+
+// Find returns commands whose text contains the search term.
+func (s *CommandService) Find(term string) ([]command.Command, error) {
+	commands, err := s.repository.List()
+	if err != nil {
+		return nil, err
+	}
+
+	var matches []command.Command
+
+	for _, cmd := range commands {
+		if strings.Contains(cmd.Command, term) {
+			matches = append(matches, cmd)
+		}
+	}
+
+	return matches, nil
+}
+
+// Get returns command whose ID is id
+func (s *CommandService) Get(id int) (command.Command, error){
+	commands, err := s.repository.List()
+	if err != nil {
+		return command.Command{}, err
+	}
+
+	for _, cmd := range commands {
+		if cmd.ID == id {
+			return cmd, nil
+		}
+	}
+
+	return command.Command{}, fmt.Errorf("command #%d not found", id)
 }
