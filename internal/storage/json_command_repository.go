@@ -97,3 +97,30 @@ func nextID(commands []command.Command) int {
 func (r *JSONCommandRepository) List() ([]command.Command, error) {
 	return r.load()
 }
+
+
+// Delete removes a command from the JSON file by id
+func (r *JSONCommandRepository) Delete(id int) error {
+	commands, err := r.load()
+	if err != nil {
+		return err
+	}
+
+	var remaining []command.Command
+	found := false
+
+	for _, cmd := range commands {
+		if cmd.ID == id {
+			found = true
+			continue
+		}
+
+		remaining = append(remaining, cmd)
+	}
+
+	if !found {
+		return fmt.Errorf("command #%d not found", id)
+	}
+
+	return r.save(remaining)
+}

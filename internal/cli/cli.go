@@ -100,6 +100,25 @@ func Run(args []string, commandService *service.CommandService) {
 
 		fmt.Printf("#%d %s\n", cmd.ID, cmd.Command)
 		
+	case "delete":
+		if len(args) < 2 {
+			fmt.Println("Usage: cmd delete <id>")
+			return
+		}
+
+		id, err := strconv.Atoi(args[1])
+		if err != nil {
+			fmt.Println("ID must be a number")
+			return
+		}
+
+		if err := commandService.Delete(id); err != nil {
+			fmt.Printf("Error: %v\n", err)
+			return
+		}
+
+		fmt.Printf("Command #%d deleted\n", id)
+
 	default:
 		fmt.Printf("Unknown command: %s\n", subcommand)
 	}

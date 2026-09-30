@@ -12,4 +12,5 @@ type CommandRepository interface {
 	// Save stores a command and returns the stored command.
 	Save(cmd command.Command) (command.Command, error)
 	List() ([]command.Command, error)
+	Delete(id int) error
 }

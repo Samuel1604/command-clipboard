@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"testing"
+	"fmt"
 
 	"github.com/Samuel1604/command-clipboard/internal/command"
 	"github.com/Samuel1604/command-clipboard/internal/service"
@@ -30,6 +31,18 @@ func (f *fakeCommandRepository) Save(cmd command.Command) (command.Command, erro
 // List returns the commands stored in our fake repository.
 func (f *fakeCommandRepository) List() ([]command.Command, error) {
 	return f.commands, nil
+}
+
+// Delete remove a command by ID from commands stored in fake repository.
+func (f *fakeCommandRepository) Delete(id int) error {
+	for i, cmd := range f.commands {
+		if cmd.ID == id {
+			f.commands = append(f.commands[:i], f.commands[i + 1:]...)
+			return nil
+		}
+	}
+
+	return fmt.Errorf("command #%d not found", id)
 }
 
 func TestCommandServiceSave(t *testing.T) {
@@ -123,5 +136,53 @@ func TestCommandServiceFind(t *testing.T) {
 
 	if matches[1].ID != 3 {
 		t.Fatalf("expected second match to have ID 3, got %d", matches[1].ID)
+	}
+}
+
+func TestCommandServiceDelete(t *testing.T) {
+	repo := &fakeCommandRepository{
+		commands: []command.Command{
+			{
+				ID:      1,
+				Command: "docker compose up -d",
+			},
+			{
+				ID:      2,
+				Command: "git status",
+			},
+		},
+	}
+
+	svc := service.NewCommandService(repo)
+
+	err := svc.Delete(1)
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+
+	if len(repo.commands) != 1 {
+		t.Fatalf("expected 1 command remaining, got %d", len(repo.commands))
+	}
+
+	if repo.commands[0].ID != 2 {
+		t.Fatalf("expected command #2 to remain, got #%d", repo.commands[0].ID)
+	}
+}
+
+func TestCommandServiceDeleteNotFound(t *testing.T) {
+	repo := &fakeCommandRepository{
+		commands: []command.Command{
+			{
+				ID:      1,
+				Command: "docker compose up -d",
+			},
+		},
+	}
+
+	svc := service.NewCommandService(repo)
+
+	err := svc.Delete(99)
+	if err == nil {
+		t.Fatal("expected error, got nil")
 	}
 }

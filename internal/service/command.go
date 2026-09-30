@@ -79,3 +79,8 @@ func (s *CommandService) Get(id int) (command.Command, error){
 
 	return command.Command{}, fmt.Errorf("command #%d not found", id)
 }
+
+// Delete removes command whose ID is id
+func (s *CommandService) Delete(id int) error {
+	return s.repository.Delete(id)
+}
